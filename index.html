@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Production Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f3ef;--surface:#fff;--surface2:#f9f8f6;--surface3:#f0ede8;
+  --border:#e4e0d8;--border2:#ccc8bf;
+  --text:#1a1816;--text2:#6b6760;--text3:#aaa59d;
+  --green:#2c5f2e;--green-bg:#e8f0e8;
+  --red:#b83232;--red-bg:#faeaea;
+  --amber:#a05c00;--amber-bg:#fff3e0;
+  --blue:#1a4a7a;--blue-bg:#e8f0fb;
+  --r:12px;--r-sm:8px;
+  --sh:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --sh2:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{-webkit-text-size-adjust:100%;}
+body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:48px;}
+
+/* HEADER */
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:52px 20px 16px;position:sticky;top:0;z-index:20;}
+.hdr-eye{font-family:'Kanit',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;}
+.hdr-title{font-family:'Kanit',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.02em;}
+.badge{font-family:'Kanit',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;background:var(--green-bg);color:var(--green);border:1px solid rgba(44,95,46,.2);border-radius:20px;padding:4px 10px;text-transform:uppercase;}
+
+/* LAYOUT */
+.page{padding:20px 16px;max-width:480px;margin:0 auto;}
+.sec{margin-bottom:24px;}
+.sec-lbl{font-family:'Kanit',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;padding-left:2px;display:flex;align-items:center;gap:8px;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* MACHINE CARD */
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;box-shadow:var(--sh);transition:box-shadow .2s;}
+.mc:focus-within{box-shadow:var(--sh2);border-color:var(--border2);}
+.mc-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.mc-name{font-family:'Kanit',sans-serif;font-size:15px;font-weight:700;margin-bottom:2px;}
+.mc-sub{font-size:11px;color:var(--text3);}
+.mc-sub b{color:var(--amber);font-weight:600;}
+.btl{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--amber-bg);color:var(--amber);border:1px solid rgba(160,92,0,.2);border-radius:20px;padding:3px 8px;display:none;white-space:nowrap;}
+.mc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.ig-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;display:block;}
+.ig-lbl span{font-weight:400;}
+.nw{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;transition:border-color .15s;}
+.nw:focus-within{border-color:var(--green);}
+.sb{background:none;border:none;color:var(--text3);font-size:16px;width:32px;height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s,color .12s;}
+.sb:active{background:var(--surface3);color:var(--text);}
+.nf{flex:1;background:none;border:none;color:var(--text);font-family:'Kanit',sans-serif;font-size:14px;font-weight:700;text-align:center;outline:none;width:0;min-width:0;height:42px;padding:0;}
+
+/* COST CARD */
+.cc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);}
+.cr{display:flex;align-items:center;padding:13px 15px;gap:10px;border-bottom:1px solid var(--border);}
+.cr:last-child{border-bottom:none;}
+.cr-info{flex:1;min-width:0;}
+.cr-name{font-size:13px;font-weight:600;margin-bottom:1px;}
+.cr-desc{font-size:11px;color:var(--text3);}
+.cr-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+/* Toggle */
+.tog{width:42px;height:24px;background:var(--border2);border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;border:none;outline:none;padding:0;}
+.tog.on{background:var(--green);}
+.tog::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s;}
+.tog.on::after{transform:translateX(18px);}
+/* Tags */
+.t-unsure{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--amber-bg);color:var(--amber);border-radius:4px;padding:2px 6px;white-space:nowrap;}
+.t-set{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--green-bg);color:var(--green);border-radius:4px;padding:2px 6px;white-space:nowrap;}
+/* Value wrap */
+.vw{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;width:100px;flex-shrink:0;transition:border-color .15s,opacity .2s;}
+.vw:focus-within{border-color:var(--green);}
+.vw.dim{opacity:.38;}
+.vp{font-size:12px;color:var(--text3);padding-left:9px;white-space:nowrap;}
+.vf{flex:1;background:none;border:none;color:var(--text);font-family:'Kanit',sans-serif;font-size:14px;font-weight:700;text-align:right;padding:0 9px;height:40px;outline:none;width:0;min-width:0;}
+
+/* TABS */
+.tabs{display:flex;background:var(--surface3);border-radius:var(--r-sm);padding:3px;margin-bottom:14px;gap:3px;}
+.tab{flex:1;background:none;border:none;color:var(--text3);font-family:'Kanit',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:9px 4px;border-radius:6px;cursor:pointer;transition:all .15s;}
+.tab.on{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.1);}
+
+/* RESULT CARDS */
+.rc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);margin-bottom:10px;}
+.rc-hdr{padding:12px 15px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;}
+.rc-hdr-t{font-family:'Kanit',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);}
+.rc-hdr-n{font-size:11px;color:var(--text3);}
+
+/* KPI grid */
+.kpi-g{display:grid;grid-template-columns:1fr 1fr;}
+.kpi{padding:15px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+.kpi:nth-child(2n){border-right:none;}
+.kpi:nth-last-child(-n+2){border-bottom:none;}
+.kpi-lbl{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;}
+.kpi-v{font-family:'Kanit',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.1;}
+.kpi-s{font-size:11px;color:var(--text3);margin-top:3px;}
+.cg{color:var(--green);} .cr_{color:var(--red);} .ca{color:var(--amber);} .cb{color:var(--blue);} .ck{color:var(--text);}
+
+/* Capacity bars */
+.capbars{display:flex;flex-direction:column;gap:8px;padding:14px 15px;}
+.cbrow{display:flex;align-items:center;gap:10px;}
+.cbn{font-size:11px;font-weight:600;color:var(--text2);width:76px;flex-shrink:0;}
+.cbbg{flex:1;height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;}
+.cbfill{height:100%;border-radius:3px;transition:width .3s;}
+.cbv{font-family:'Kanit',sans-serif;font-size:11px;font-weight:700;color:var(--text2);width:72px;text-align:right;flex-shrink:0;}
+
+/* P&L rows */
+.pr{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;border-bottom:1px solid var(--border);font-size:13px;}
+.pr:last-child{border-bottom:none;}
+.pr.tot{background:var(--surface2);font-weight:600;}
+.pr-l{display:flex;align-items:center;gap:8px;color:var(--text2);}
+.pdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.pr-r{text-align:right;}
+.prpp{font-family:'Kanit',sans-serif;font-size:13px;font-weight:700;}
+.prtot{font-size:10px;color:var(--text3);margin-top:1px;}
+.prnote{font-size:10px;color:var(--amber);margin-top:1px;}
+
+/* Investment */
+.ir{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;border-bottom:1px solid var(--border);}
+.ir:last-child{border-bottom:none;}
+.ir-n{font-size:13px;color:var(--text2);font-weight:500;}
+.ir-s{font-size:11px;color:var(--text3);margin-top:1px;}
+.ir-v{font-family:'Kanit',sans-serif;font-size:14px;font-weight:700;}
+
+/* Payback card */
+.pb{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh);}
+.pb-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;}
+.pb-t{font-family:'Kanit',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);}
+.pb-v{font-family:'Kanit',sans-serif;font-size:20px;font-weight:800;}
+.bar-bg{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-bottom:10px;}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s cubic-bezier(.4,0,.2,1);}
+.pb-note{font-size:11px;color:var(--text2);line-height:1.7;}
+.pb-note b{color:var(--text);}
+.warnbox{background:var(--red-bg);border:1px solid rgba(184,50,50,.18);border-radius:var(--r-sm);padding:11px 13px;font-size:12px;color:var(--red);line-height:1.5;margin-top:10px;}
+.unsurebox{background:var(--amber-bg);border:1px solid rgba(160,92,0,.18);border-radius:var(--r-sm);padding:10px 13px;font-size:11px;color:var(--amber);line-height:1.5;margin-top:10px;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-eye">ของเล่นป๊าวัย 60 +</div>
+  <div class="hdr-row">
+    <div class="hdr-title">Cost &amp; ROI</div>
+    <div class="badge">Live Calc</div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- MACHINES -->
+  <div class="sec">
+    <div class="sec-lbl">Machines</div>
+
+    <div class="mc">
+      <div class="mc-hdr">
+        <div>
+          <div class="mc-name">เครื่องทำถุงมือ</div>
+          <div class="mc-sub">ราคาต่อเครื่อง: <b id="dc-main">฿120,000</b></div>
+        </div>
+        <div class="btl" id="btl-main">⚡ bottleneck</div>
+      </div>
+      <div class="mc-grid">
+        <div>
+          <span class="ig-lbl">ราคาเครื่อง <span>(฿)</span></span>
+          <div class="nw"><button class="sb" onclick="sf('cm',-1000)">−</button><input class="nf" type="number" id="cm" value="120000" min="0" inputmode="numeric" oninput="rc()"><button class="sb" onclick="sf('cm',1000)">+</button></div>
+        </div>
+        <div>
+          <span class="ig-lbl">จำนวนเครื่อง</span>
+          <div class="nw"><button class="sb" onclick="sf('qm',-1)">−</button><input class="nf" type="number" id="qm" value="25" min="1" inputmode="numeric" oninput="rc()"><button class="sb" onclick="sf('qm',1)">+</button></div>
+        </div>
+        <div>
+          <span class="ig-lbl">ผลิตได้ <span>(แพคต่อวัน)</span></span>
+          <div class="nw"><button class="sb" onclick="sf('capm',-1)">−</button><input class="nf" type="number" id="capm" value="29" min="1" inputmode="numeric" oninput="rc()"><button class="sb" onclick="sf('capm',1)">+</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mc">
+      <div class="mc-hdr">
+        <div>
+          <div class="mc-name">เครื่องเย็บขอบ</div>
+          <div class="mc-sub">ราคาต่อเครื่อง: <b id="dc-edge">฿140,000</b></div>
+        </div>
+        <div class="btl" id="btl-edge">⚡ bottleneck</div>
+      </div>
+      <div class="mc-grid">
+        <div>
+          <span class="ig-lbl">ราคาเครื่อง <span>(฿)</span></span>
+          <div class="nw"><button class="sb" onclick="sf('ce',-1000)">−</button><input class="nf" type="number" id="ce" value="140000" min="0" inputmode="numeric" oninput="rc()"><button class="sb" onclick="sf('ce',1000)">+</button></div>
+        </div>
+        <div>
+          <span class="ig-lbl">จำนวนเครื่อง</span>
+          <div class="nw"><button class="sb" onclick="sf('qe',-1)">−</button><input class="nf" type="number" id="qe" value="1" min="1" inputmode="numeric" oninput="rc()"><button class="sb" onclick="sf('qe',1)">+</button></div>
+        </div>
+        <div>
+          <span class="ig-lbl">ผลิตได้ <span>(แพคต่อชั่วโมง)</span></span>
+          <div class="nw"><button class="sb" onclick="sf('cape',-1)">−</button><input class="nf" type="number" id="cape" value="50" min="1" inputmode="numeric" oninput="rc()"><button class="sb" onclick="sf('cape',1)">+</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mc">
+      <div class="mc-hdr">
+        <div>
+          <div class="mc-name">เครื่องแพค</div>
+          <div class="mc-sub">ราคาต่อเครื่อง: <b id="dc-pack">฿25,000</b></div>
+        </div>
+        <div class="btl" id="btl-pack">⚡ bottleneck</div>
+      </div>
+      <div class="mc-grid">
+        <div>
+          <span class="ig-lbl">ราคาเครื่อง <span>(฿)</span></span>
+          <div class="nw"><button class="sb" onclick="sf('cp',-1000)">−</button><input class="nf" type="number" id="cp" value="25000" min="0" inputmode="numeric" oninput="rc()"><button class="sb" onclick="sf('cp',1000)">+</button></div>
+        </div>
+        <div>
+          <span class="ig-lbl">จำนวนเครื่อง</span>
+          <div class="nw"><button class="sb" onclick="sf('qp',-1)">−</button><input class="nf" type="number" id="qp" value="1" min="1" inputmode="numeric" oninput="rc()"><button class="sb" onclick="sf('qp',1)">+</button></div>
+        </div>
+        <div>
+          <span class="ig-lbl">ผลิตได้ <span>(แพคต่อชั่วโมง)</span></span>
+          <div class="nw"><button class="sb" onclick="sf('capp',-1)">−</button><input class="nf" type="number" id="capp" value="75" min="1" inputmode="numeric" oninput="rc()"><button class="sb" onclick="sf('capp',1)">+</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVENUE & COSTS -->
+  <div class="sec">
+    <div class="sec-lbl">Revenue &amp; Costs per Pack</div>
+    <div class="cc">
+
+      <div class="cr">
+        <div class="cr-info">
+          <div class="cr-name">ราคาขาย</div>
+          <div class="cr-desc">ราคาขายต่อแพค</div>
+        </div>
+        <div class="cr-right">
+          <span id="tg-sell" class="t-unsure">Unsure</span>
+          <button class="tog" id="tog-sell" onclick="tog('sell')" aria-label="toggle sell price"></button>
+          <div class="vw dim" id="vw-sell"><span class="vp">฿</span><input class="vf" type="number" id="vs" value="0" min="0" inputmode="decimal" oninput="rc()"></div>
+        </div>
+      </div>
+
+      <div class="cr">
+        <div class="cr-info">
+          <div class="cr-name">กำไร</div>
+          <div class="cr-desc">กำไรต่อแพค ยังไม่รู้ราคาขาย</div>
+        </div>
+        <div class="cr-right">
+          <span class="t-set">Fixed</span>
+          <div class="vw"><span class="vp">฿</span><input class="vf" type="number" id="vpr" value="5" min="0" inputmode="decimal" oninput="rc()"></div>
+        </div>
+      </div>
+
+      <div class="cr">
+        <div class="cr-info">
+          <div class="cr-name">ค่าแรง</div>
+          <div class="cr-desc">ค่าแรงต่อแพค</div>
+        </div>
+        <div class="cr-right">
+          <span id="tg-labor" class="t-unsure">Unsure</span>
+          <button class="tog" id="tog-labor" onclick="tog('labor')" aria-label="toggle labor"></button>
+          <div class="vw dim" id="vw-labor"><span class="vp">฿</span><input class="vf" type="number" id="vl" value="1" min="0" inputmode="decimal" oninput="rc()"></div>
+        </div>
+      </div>
+
+      <div class="cr">
+        <div class="cr-info">
+          <div class="cr-name">ค่าไฟ</div>
+          <div class="cr-desc">ค่าไฟต่อแพค</div>
+        </div>
+        <div class="cr-right">
+          <span id="tg-elec" class="t-unsure">Unsure</span>
+          <button class="tog" id="tog-elec" onclick="tog('elec')" aria-label="toggle electricity"></button>
+          <div class="vw dim" id="vw-elec"><span class="vp">฿</span><input class="vf" type="number" id="ve" value="30" min="0" inputmode="decimal" oninput="rc()"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="sec">
+    <div class="sec-lbl">Results</div>
+    <div class="tabs">
+      <button class="tab on" id="tab-day"   onclick="st('day')">รายวัน</button>
+      <button class="tab"    id="tab-month" onclick="st('month')">รายเดือน</button>
+      <button class="tab"    id="tab-year"  onclick="st('year')">รายปี</button>
+    </div>
+
+    <div class="rc">
+      <div class="rc-hdr"><span class="rc-hdr-t">Key Metrics</span><span class="rc-hdr-n" id="period-lbl">per day</span></div>
+      <div class="kpi-g" id="kpi-g"></div>
+    </div>
+
+    <div class="rc">
+      <div class="rc-hdr"><span class="rc-hdr-t">Line Capacity</span><span class="rc-hdr-n">packs / day</span></div>
+      <div class="capbars" id="capbars"></div>
+    </div>
+
+    <div class="rc">
+      <div class="rc-hdr"><span class="rc-hdr-t">P&amp;L Breakdown</span><span class="rc-hdr-n" id="pnl-lbl">per pack · per day</span></div>
+      <div id="pnl-rows"></div>
+    </div>
+
+    <div class="rc">
+      <div class="rc-hdr"><span class="rc-hdr-t">Investment</span></div>
+      <div id="inv-rows"></div>
+    </div>
+
+    <div class="pb" id="pb"></div>
+  </div>
+
+</div>
+
+<script>
+const T={sell:false,labor:false,elec:false};
+let tab='day';
+
+function tog(k){
+  T[k]=!T[k];
+  document.getElementById('tog-'+k).classList.toggle('on',T[k]);
+  const tg=document.getElementById('tg-'+k);
+  tg.textContent=T[k]?'Confirmed':'Unsure';
+  tg.className=T[k]?'t-set':'t-unsure';
+  document.getElementById('vw-'+k).classList.toggle('dim',!T[k]);
+  rc();
+}
+function st(t){
+  tab=t;
+  ['day','month','year'].forEach(x=>document.getElementById('tab-'+x).classList.toggle('on',x===t));
+  rc();
+}
+function sf(id,d){
+  const el=document.getElementById(id);
+  let v=(parseFloat(el.value)||0)+d;
+  if(v<(parseFloat(el.min)||0))v=parseFloat(el.min)||0;
+  el.value=v;rc();
+}
+const fN=(n,d=0)=>isFinite(n)?n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const fB=n=>'฿'+fN(n);
+const fS=n=>(n>=0?'+':'')+fB(n);
+const V=id=>parseFloat(document.getElementById(id).value)||0;
+
+function rc(){
+  // Unit costs
+  const uc={main:V('cm'),edge:V('ce'),pack:V('cp')};
+  document.getElementById('dc-main').textContent=fB(uc.main);
+  document.getElementById('dc-edge').textContent=fB(uc.edge);
+  document.getElementById('dc-pack').textContent=fB(uc.pack);
+
+  // Quantities & capacities
+  const qty={main:Math.max(1,V('qm')),edge:Math.max(1,V('qe')),pack:Math.max(1,V('qp'))};
+  // main = packs/day; edge & pack = packs/hr × 24
+  const cap={
+    main:qty.main*Math.max(1,V('capm')),
+    edge:qty.edge*Math.max(1,V('cape'))*24,
+    pack:qty.pack*Math.max(1,V('capp'))*24
+  };
+  const bot=Math.min(cap.main,cap.edge,cap.pack);
+  ['main','edge','pack'].forEach(k=>{
+    document.getElementById('btl-'+k).style.display=cap[k]===bot?'inline-flex':'none';
+  });
+
+  // Per-pack economics
+  const profPP=V('vpr');
+  const sellPP=T.sell?V('vs'):0;
+  const labPP =T.labor?V('vl'):0;
+  const elecPP=T.elec?V('ve'):0;
+  const revPP =T.sell?sellPP:profPP;   // income per pack
+  const costPP=labPP+elecPP;           // confirmed costs per pack
+  const netPP =revPP-costPP;
+
+  // Period multiplier
+  const mult=tab==='day'?1:tab==='month'?30:365;
+  const pstr=tab==='day'?'day':tab==='month'?'30 days':'365 days';
+  document.getElementById('period-lbl').textContent='per '+pstr;
+  document.getElementById('pnl-lbl').textContent='per pack · per '+pstr;
+
+  const output=bot*mult;
+  const income=output*revPP;
+  const costs =output*costPP;
+  const net   =output*netPP;
+
+  // KPI
+  document.getElementById('kpi-g').innerHTML=`
+    <div class="kpi"><div class="kpi-lbl">ยอดผลิต</div><div class="kpi-v ck">${fN(output)}</div><div class="kpi-s">packs / ${pstr}</div></div>
+    <div class="kpi"><div class="kpi-lbl">รายได้</div><div class="kpi-v ca">${fB(income)}</div><div class="kpi-s">${T.sell?'from sell price':'from profit margin'}</div></div>
+    <div class="kpi"><div class="kpi-lbl">ต้นทุนทั้งหมด</div><div class="kpi-v cr_">${fB(costs)}</div><div class="kpi-s">${!T.labor&&!T.elec?'no costs confirmed':'confirmed only'}</div></div>
+    <div class="kpi"><div class="kpi-lbl">กำไร</div><div class="kpi-v ${net>=0?'cg':'cr_'}">${fS(net)}</div><div class="kpi-s">/ ${pstr}</div></div>
+  `;
+
+  // Capacity bars
+  const maxC=Math.max(cap.main,cap.edge,cap.pack);
+  document.getElementById('capbars').innerHTML=
+    [['main','ทำถุงมือ','#2c5f2e'],['edge','เย็บขอบ','#1a4a7a'],['pack','แพค','#a05c00']].map(([k,nm,col])=>`
+    <div class="cbrow">
+      <span class="cbn">${nm}</span>
+      <div class="cbbg"><div class="cbfill" style="width:${((cap[k]/maxC)*100).toFixed(1)}%;background:${col}"></div></div>
+      <span class="cbv">${fN(cap[k])}/day</span>
+    </div>`).join('');
+
+  // P&L rows
+  const rows=[
+    T.sell
+      ?{l:'Sell price',     pp:+sellPP, col:'#2c5f2e',dot:'#2c5f2e',note:null}
+      :{l:'Profit margin',  pp:+profPP, col:'#2c5f2e',dot:'#2c5f2e',note:'Sell price not set — using fixed margin'},
+    T.labor
+      ?{l:'Labor cost',     pp:-labPP,  col:'#b83232',dot:'#b83232',note:null}
+      :{l:'Labor cost',     pp:0,       col:'#aaa59d',dot:'#ccc8bf',note:'Not confirmed (toggled off)'},
+    T.elec
+      ?{l:'Electricity',    pp:-elecPP, col:'#a05c00',dot:'#a05c00',note:null}
+      :{l:'Electricity',    pp:0,       col:'#aaa59d',dot:'#ccc8bf',note:'Not confirmed (toggled off)'},
+    {l:'Net per pack', pp:netPP, col:netPP>=0?'#2c5f2e':'#b83232', dot:netPP>=0?'#2c5f2e':'#b83232', note:null, tot:true}
+  ];
+  document.getElementById('pnl-rows').innerHTML=rows.map(r=>`
+    <div class="pr${r.tot?' tot':''}">
+      <span class="pr-l"><span class="pdot" style="background:${r.dot}"></span>${r.l}</span>
+      <div class="pr-r">
+        <div class="prpp" style="color:${r.col}">${r.pp>=0?'+':''}฿${r.pp.toFixed(0)}/pk</div>
+        <div class="prtot">${r.pp>=0?'+':''}${fB(r.pp*output)}</div>
+        ${r.note?`<div class="prnote">~ ${r.note}</div>`:''}
+      </div>
+    </div>`).join('');
+
+  // Investment
+  const inv={main:qty.main*uc.main,edge:qty.edge*uc.edge,pack:qty.pack*uc.pack};
+  const totInv=inv.main+inv.edge+inv.pack;
+  const mnames={main:'เครื่องทำถุงมิอ',edge:'เครื่องเย็บขอบ',pack:'เครื่องแพค'};
+  document.getElementById('inv-rows').innerHTML=
+    ['main','edge','pack'].map(k=>`
+    <div class="ir">
+      <div><div class="ir-n">${mnames[k]} × ${qty[k]}</div><div class="ir-s">${fB(uc[k])} each</div></div>
+      <div class="ir-v">${fB(inv[k])}</div>
+    </div>`).join('')+`
+    <div class="ir" style="background:var(--surface2)">
+      <div style="font-family:'Kanit',sans-serif;font-size:14px;font-weight:800;">Total investment</div>
+      <div class="ir-v" style="color:var(--amber);font-size:16px;">${fB(totInv)}</div>
+    </div>`;
+
+  // Payback & ROI
+  const netDay=bot*netPP;
+  const roiY=totInv>0?(netDay*365/totInv*100):0;
+  const pbDays=netDay>0?totInv/netDay:Infinity;
+  const pbMonths=pbDays/30;
+  const barW=netDay>0?Math.min(100,(1/pbMonths)*100*24).toFixed(1):2;
+  const barCol=netDay>=0?'var(--green)':'var(--red)';
+  const pbValStr=isFinite(pbDays)?`${fN(pbDays,0)} days`:'N/A';
+
+  let pbHTML=`
+    <div class="pb-hdr">
+      <span class="pb-t">ROI &amp; Payback</span>
+      <span class="pb-v" style="color:${netDay>=0?'var(--green)':'var(--red)'}">${pbValStr}</span>
+    </div>
+    <div class="bar-bg"><div class="bar-fill" style="width:${barW}%;background:${barCol}"></div></div>
+    <div class="pb-note">
+      Annual ROI: <b>${roiY.toFixed(1)}%</b>&nbsp;·&nbsp;
+      Daily net: <b>${fS(netDay)}</b>&nbsp;·&nbsp;
+      Payback: <b>${isFinite(pbMonths)?pbMonths.toFixed(1)+' months':'—'}</b>
+    </div>`;
+
+  if(!T.sell&&!T.labor&&!T.elec){
+    pbHTML+=`<div class="unsurebox">All variable costs are off. ROI uses ฿${profPP}/pack fixed margin only. Toggle on confirmed values for accurate results.</div>`;
+  } else if(!T.sell){
+    pbHTML+=`<div class="unsurebox">Sell price not confirmed — income uses ฿${profPP}/pack margin. Set sell price when known.</div>`;
+  }
+  if(netDay<0){
+    pbHTML+=`<div class="warnbox">Net profit is negative (฿${fN(netDay)}/day). Confirmed costs exceed income. Review pricing or cost inputs.</div>`;
+  }
+  document.getElementById('pb').innerHTML=pbHTML;
+}
+
+rc();
+</script>
+</body>
+</html>
